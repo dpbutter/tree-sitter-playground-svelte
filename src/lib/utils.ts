@@ -1,4 +1,4 @@
-import type { SyntaxNode, Point } from 'web-tree-sitter';
+import type { Node as SyntaxNode, Point } from 'web-tree-sitter';
 
 export type FormatTree = {id: number, startPosition: Point, endPosition: Point, prefix: string, name: string, suffix: string}
 

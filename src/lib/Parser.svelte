@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount, tick, onDestroy } from "svelte";
-  import Parser from "web-tree-sitter";
-  import type { SyntaxNode, Point } from "web-tree-sitter";
+  import { Parser, Language } from 'web-tree-sitter';
+  import { Node as SyntaxNode} from "web-tree-sitter";
+  import type { Point } from "web-tree-sitter";
   import { escapeHtml, formatTree, type FormatTree } from "./utils";
   // Optionally, import a mode for syntax highlighting:
   // import 'codemirror/mode/javascript/javascript.js';
@@ -18,6 +19,7 @@
   import { StateEffect, StateField, RangeSetBuilder } from "@codemirror/state";
   import type { DecorationSet } from "@codemirror/view";
   import { Decoration, ViewPlugin, WidgetType } from "@codemirror/view";
+
 
   // State field that tracks highlighted ranges
   const highlightEffect =
@@ -120,18 +122,26 @@
   let queryEditor: EditorView;
 
   async function loadParser() {
-    const { default: Parser } = await import("web-tree-sitter");
-    await Parser.init();
+    // const response = await fetch('tree-sitter.wasm');
+    // console.log(response)
+    // const wasmBinary = await response.arrayBuffer();
+    await Parser.init({
+      locateFile(scriptName: string, scriptDirectory: string) {
+        return scriptName;
+      },
+    });
+    // const JavaScript = await Parser.Language.load(`tree-sitter-javascript`);
     parser = new Parser();
+    // parser.setLanguage(JavaScript);
   }
 
   async function loadLanguage(language: string = "javascript") {
     try {
-      const Language = await Parser.Language.load(
-        `/tree-sitter-${language}.wasm`,
+      const xLanguage = await Language.load(
+        `tree-sitter-${language}.wasm`,
       );
-      parser.setLanguage(Language);
-      currentLanguage = Language;
+      parser.setLanguage(xLanguage);
+      currentLanguage = xLanguage;
       errorMessage = "";
       await parseCode(code);
     } catch (error: any) {
